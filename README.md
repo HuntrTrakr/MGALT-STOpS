@@ -1,4 +1,4 @@
-# STOpS-MGALT
+# MGALT STOpS
 This MATLAB code was used by Malloy in his thesis titled "Spacecraft Trajectory Optimization Suite (STOpS): Design and Optimization of Multiple Gravity-Assist Low-Thrust (MGALT) Trajectories Using Modern Optimization Techniques". This code is the continuation of work done by Fitzgerald and Sheehan with the MGALT and Low-Thrust problems respectively.
 
 <!-- # Motivation -->
