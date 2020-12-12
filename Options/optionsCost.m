@@ -149,9 +149,6 @@ switch OPT.solver
                 % Weighting
                 opt_weight.W_tof_conv = 3.5;   	% Weight factor for end time convergence
                 opt_weight.control_v = 0.005;	% Weight factor for the tolerance for the dV step
-                opt_weight.MBH_feas = 1e-5;    	% Weight factor for determining if the solution falls into feasibility
-                    % ^ Really should be feasibility for the whole thing
-                    % for whoever works on this after me
                     
                 % ODE
                 opt_ode = odeset('AbsTol',1e-6,'RelTol',1e-6);

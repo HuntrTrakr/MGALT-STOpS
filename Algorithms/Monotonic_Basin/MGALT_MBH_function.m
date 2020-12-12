@@ -57,7 +57,7 @@ function [f_best_return,x_star_best_return,is_viable,neval] = ...
 % |-----------------------------------------------------------------------
 % |
 % | OUTPUTS:
-% |     -f_best             (1,1)       [float]         [unitless]
+% |     -f_best             (1,Nvar)    [float]         [unitless]
 % |         The respective cost of each member in 'x0'
 % |     -member_final       (1,Nvar)    [float]         [unitless]
 % |         The new perturbed member consisting of the original member and
@@ -80,18 +80,6 @@ function [f_best_return,x_star_best_return,is_viable,neval] = ...
 
 % Number of iterations
 num_iter_global = size(x0,1);     % Number of iterations for the outer loop
-
-% Number of loop
-per_feas = OPT_algo.per_feas(num_mig);	% Feasibility percentage for SOI
-per_rand = OPT_algo.per_rand(num_mig);	% Random percentage for generating new results
-if loop == 1
-    num_iter_basin = OPT_algo(count_MBH).N1_Inner;     	% Number of iterations for the inner loop
-    disp_info = ' ---Potential Basin Found---';
-elseif loop == 2
-    num_iter_basin = OPT_algo(count_MBH).N2_Outer;   	% Number of iterations for the inner loop
-    per_rand = per_rand/2;
-    disp_info = ' ---Exploring Minima---';
-end
 
 % Preallocate Cost Parameters
 f = zeros(num_iter_global,1);
@@ -246,108 +234,102 @@ neval = num_iter_global;
 %% Check Feasibility
 
 ll_feas = fprintf('\n ---Checking Feasibility---\n');
+
+per_feas = OPT_algo.per_feas(num_mig);	% Feasibility percentage for SOI
+
+search_index = [];
+count_index = 1;
+
 for i2 = 1:num_iter_global
     
-    % ***1.0 Pre-allocate/Random point***
-    f_best = [];
-    x_star_best = [];
-    N_not_improve = 0;
-    
     % ***3.0 Check x_star feasibility***
-    % ***MGALT NOTE***
-    % Due to the multiple transfers and subsequently having to use an indirect
-    % and direct method for solving, the variable x* is not going to be defined
-    % as simplistic as it is within the psudo algorithm
-    [feasible,~,~] = MGALT_MBH_isFeasible(BOD,CONST,OPT,VAR,plot_vars(i2),per_feas);
+    [feasible,~,~] = MGALT_MBH_isFeasible(BOD,CONST,OPT,OPT_algo,VAR,plot_vars(i2),per_feas);
     
-    % If there was feasibility
-    if any(feasible)
-%     if all(feasible)
-
-        % A basin has been found, start the iteration process to explore it
-        ll_MBH = fprintf('%s\n',disp_info);
-
-        f_current = f(i2);
-        x_current = x0(i2,:);
-
-        f_best = f(i2);
-        x_star_best = x0(i2,:);
+    if OPT_algo.feas_check(feasible)
+        
+        search_index(count_index) = i2;
+        count_index = count_index+1;
+        
         is_viable(i2) = true;
+
     else
-        % No basin was found, exit the function to then try the next member
+        
+        % No basin was found, try the next member
         f_best_return(i2) = f(i2);
         x_star_best_return(i2,:) = x0(i2,:);
         is_viable(i2) = false;
-        continue
+        
+    end
+    
+end
+
+% If nothing feasible was found, return
+if size(search_index,2) == 0
+    return
+end
+
+fprintf(repmat('\b',1,ll_feas))
+
+
+
+%% If Feasibility, Check Basins
+
+if loop == 1
+    disp_info = '\n ---Potential Basin Found---';
+elseif loop == 2
+    disp_info = '\n ---Exploring Minima---';
+end
+
+% A basin has been found, start the iteration process to explore it
+ll_MBH = fprintf('%s\n',disp_info);
+
+if OPT.parallel
+    
+    % Preallocate
+    fh = @MGALT_MBH_basin;
+    b_data(1:size(search_index,2)) = parallel.FevalFuture;
+    
+    % Display info
+    ll_par = fprintf('\n    Parallel Processing   \n');
+    ll_RAM = fprintf(2,'    Watch CPU/RAM usage   \n\n');
+    
+    % feval
+    for i3 = 1:size(search_index,2)
+        b_data(i3) = parfeval(OPT.ppool,fh,2,BOD,CONST,OPT,OPT_algo,VAR,...
+            f(search_index(i3)),x0(search_index(i3),:),num_mig,count_MBH,loop);
+    end
+    
+     % Collect results as they become available
+    for i4 = 1:size(search_index,2)
+        [p_index,p_f,p_x] = fetchNext(b_data);
+        p_f_best(p_index) = p_f;
+        p_x_best(p_index,:) = p_x;
+    end
+    
+    % Put the data into the correct index for func return
+    for i5 = 1:size(search_index,2)
+        f_best_return(search_index(i5)) = p_f_best(i5);
+        x_star_best_return(search_index(i5),:) = p_x_best(i5,:);
     end
 
-    % ***4.0 If x_star is feasible***
-    while N_not_improve < num_iter_basin
+    % Clear display
+    fprintf(repmat('\b',1,ll_RAM))
+    fprintf(repmat('\b',1,ll_par))
+    
+else
 
-        neval = neval+1;
+    for i3 = 1:size(search_index,2)
 
-        % ***4.1 Generate x_prime***
-        % Generate x_prime by randomly perturbing x_current
-        [x_prime] = MGALT_MBH_randomize(BOD,OPT,VAR,x_current,per_rand);
-
-        % ***4.2 Run NLP to find x_star***
-        % Run the NLP problem solver to find x_star using the initial guess x0
-        [f_prime,plot_vars_prime] = feval(OPT.solver,x_prime,BOD,CONST,OPT,VAR);
-        ll_Basin = fprintf('      Test: %1.0f/%1.0f\n',N_not_improve+1,num_iter_basin);
-
-        % ***4.3 Check x_star feasibility***
-        % If x_star is a feasible point AND the cost for x_star is lower than x_current
-        [feasible,~,~] = MGALT_MBH_isFeasible(BOD,CONST,OPT,VAR,plot_vars_prime,per_feas);
-        if any(feasible)
-%         if all(feasible)
-
-            % The nested "if" loop is used to prevent the error "Operands to the 
-            % || and && operators must be convertible to logical scalar values."
-            if (f_prime < f_current)
-
-                % The current stuff is now the perturbed stuff
-                f_current = f_prime;
-                x_current = x_prime;
-
-                % Add onto the array of the best members and costs
-                x_star_best = [x_star_best; x_prime];
-                f_best = [f_best; f_prime];
-
-                % Reset the not_improve conditions and change the percent
-                % modifiers
-                N_not_improve = 0;
-                per_feas = per_feas/2;
-                per_rand = per_rand/2;
-
-            else
-                % Add onto the not improve
-                N_not_improve = N_not_improve+1;
-            end
-
-        else
-            % Add onto the not improve
-            N_not_improve = N_not_improve+1;
-        end
-
-        % Remove the "Test #/#"
-        fprintf(repmat('\b',1,ll_Basin))
+        [f_best_return(search_index(i3)),x_star_best_return(search_index(i3),:)] = ...
+            MGALT_MBH_basin(BOD,CONST,OPT,OPT_algo,VAR,...
+            f(search_index(i3)),x0(search_index(i3),:),num_mig,count_MBH,loop);
 
     end
-
-    % Remove "Potential Basin Found"
-    fprintf(repmat('\b',1,ll_MBH))
-
-
-    % ***5.0 Find the problem solution***
-    % Get the index of the best solution
-    [~,index] = min(f_best);
-
-    % Use the index to pull out the values
-    f_best_return(i2) = f_best(index);
-    x_star_best_return(i2,:) = x_star_best(index,1:end);
 
 end
-fprintf(repmat('\b',1,ll_feas))
+
+% Remove "Potential Basin Found"
+fprintf(repmat('\b',1,ll_MBH))
 
 
 

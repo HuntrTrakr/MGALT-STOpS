@@ -50,32 +50,49 @@ function [] = plotOrbits(BOD,CONST,OPT,VAR,plot_vars)
 
 
 
-%% Setup
+%% User Choices
+
+% Size of Sun and Planets
+planet_size = 30;
+sun_size = 40;
+
+% General line sizes and shapes
+line_width_orbit = 2;
+line_width_thruster_angle = 2;
+line_width_terminal_point = 5;
+line_shape_terminal_point = 'kd';
+
+% Direct method points and arrows
+point_size = 25;
+arrow_length = 0.3;
+arrow_head_size = 1;
+arrow_width = 2;
+
+% Font
+font_size = 24;
+font_style = 'Times';
+font_terminal = 'Terminal Points';
+
+% Colors
+sun_color = [0.95,0.95,0];
+arrow_color = [0,0.5,0];
+
+
+
+%% Constants
 
 % Get Constants
 mew_sun = CONST.Sun_mu;     % km^3/s^2
 AU = CONST.AU;              % km/AU
 SOI_divisions = 0:pi/180:2*pi;
 orbit_margin = 1.01;
-transfers = VAR.transfers;
-
-% Sizing Parameters
-line_width_thruster_angle = 2;
-line_width_orbit = 2;
-line_shape_terminal_point = 'kd';
-line_width_terminal_point = 5;
-font_size = 24;
-font_style = 'Times';
-size_planet = 75;
-size_sun = 200;
-text_terminal = 'Terminal Points';
 
 % Plot colors
 plot_col = get(gca,'colororder');
 
 
 
-%% Different Plot Methods
+%% Plot Orbits
 
 switch OPT.solver
     
@@ -85,7 +102,7 @@ switch OPT.solver
         figure(1)
         
         % Grid Basics
-        scatter(0,0,size_sun,[.95 .95 0],'filled');  % Plot the Sun
+        plot(0,0,'color',sun_color,'marker','.','markersize',sun_size);  % Plot the Sun
         hold on
         grid on
         Legend1{1} = 'Sun';
@@ -94,7 +111,7 @@ switch OPT.solver
         body_data = plot_vars.planetary_conditions(:,1);
         body_X = body_data(1)/AU;	% DU
         body_Y = body_data(2)/AU; 	% DU
-        scatter(body_X,body_Y,size_planet,plot_col(1,:),'filled');	% Body Position
+        plot(body_X,body_Y,'Color',plot_col(1,:),'marker','.','markersize',planet_size);    % Body Position
 
         % Plot the Departure Body's SOI
         body_SOI = CONST.(strcat(BOD.bodies{1},"_SOI"))/AU;
@@ -125,8 +142,8 @@ switch OPT.solver
         thrust_R = plot_vars.seg_start{1,1}(:,1);                       % DU
         thrust_arc = plot_vars.seg_start{1,1}(:,2);                     % deg
         [thrust_X,thrust_Y] = pol2cart(thrust_arc*pi/180,thrust_R);     % points for the thrust vectors
-        thrust_mag = thrust_plot_dist/AU/5*ones(length(thrust_switch),1);               	% magnitude of thrust vectors for visual
-        thrust_ang_global = thrust_arc + 90 - thrust_angle';                                % global angle for thrust vectors
+        thrust_mag = arrow_length*ones(length(thrust_switch),1);       	% magnitude of thrust vectors for visual
+        thrust_ang_global = thrust_arc + 90 - thrust_angle';         	% global angle for thrust vectors
         [thrust_X_global,thrust_Y_global] = pol2cart(thrust_ang_global*pi/180,thrust_mag);	% points for the thrust vectors 
 
         % Plot the Thrust Vectors
@@ -134,12 +151,15 @@ switch OPT.solver
         for i2 = 1:length(thrust_X)
 
             if thrust_switch(i2)
-                thrust_point_line(1,i2) = scatter(thrust_X(i2),thrust_Y(i2),25,[0,0.5,0],'filled');
-                thrust_quiver_line(1,quiver_count) = quiver(thrust_X(i2),thrust_Y(i2),thrust_X_global(i2),thrust_Y_global(i2),'color',[0,0.5,0],'MaxHeadSize',thrust_plot_dist);
+                thrust_point_line(1,i2) = plot(thrust_X(i2),thrust_Y(i2),...
+                    'Color',arrow_color,'marker','.','markersize',point_size);
+                thrust_quiver_line(1,quiver_count) = quiver(thrust_X(i2),thrust_Y(i2),thrust_X_global(i2),thrust_Y_global(i2),...
+                    'color',[0,0.5,0],'MaxHeadSize',(arrow_head_size*AU),'LineWidth',arrow_width);
                 set(get(get(thrust_quiver_line(1,quiver_count),'Annotation'),'LegendInformation'),'IconDisplayStyle','off');	% Exclude line from legend
                 quiver_count = quiver_count+1;
             else
-                thrust_point_line(1,i2) = scatter(thrust_X(i2),thrust_Y(i2),25,[0,0.5,0]);
+                thrust_point_line(1,i2) = plot(thrust_X(i2),thrust_Y(i2),...
+                    'Color',arrow_color,'marker','o','markersize',point_size/4);
             end
 
             set(get(get(thrust_point_line(1,i2),'Annotation'),'LegendInformation'),'IconDisplayStyle','off');              % Exclude line from legend
@@ -155,7 +175,7 @@ switch OPT.solver
         body_data = plot_vars.planetary_conditions(:,end);
         body_X = body_data(1)/AU;	% DU
         body_Y = body_data(2)/AU; 	% DU
-        scatter(body_X,body_Y,size_planet,plot_col(2,:),'filled');	% Body Position
+        plot(body_X,body_Y,'Color',plot_col(2,:),'marker','.','markersize',planet_size);    % Body Position
         Legend1{4} = BOD.bodies{end};
         
         % Plot the Target Body's SOI
@@ -239,11 +259,13 @@ switch OPT.solver
         % Final Graph Elements
         hold off
         xlabel('Time (TU)')
-        ylabel('\phi (\circ)')
+        ylabel('\phi (deg)')
         legend(string(Legend2),'location','eastoutside')
         title('Thruster Pointing Angle \phi for Direct FSM')
         set(gca,'FontSize',font_size)
         set(gca,'FontName',font_style)
+        ylim([0 360])
+        yticks([0,45,90,135,180,225,270,315,360])
         
     case {'LT_IN_FSM_2D'}
 
@@ -251,7 +273,7 @@ switch OPT.solver
         figure(1)
         
         % Grid Basics
-        scatter(0,0,size_sun,[.95 .95 0],'filled');  % Plot the Sun
+        plot(0,0,'color',sun_color,'marker','.','markersize',sun_size);  % Plot the Sun
         hold on
         grid on
         Legend1{1} = 'Sun';
@@ -260,7 +282,7 @@ switch OPT.solver
         body_data = plot_vars.planetary_conditions(:,1);
         body_X = body_data(1)/AU;	% DU
         body_Y = body_data(2)/AU; 	% DU
-        scatter(body_X,body_Y,size_planet,plot_col(1,:),'filled');	% Body Position
+        plot(body_X,body_Y,'Color',plot_col(1,:),'marker','.','markersize',planet_size);    % Body Position
 
         % Plot the Departure Body's SOI
         body_SOI = CONST.(strcat(BOD.bodies{1},"_SOI"))/AU;
@@ -293,7 +315,7 @@ switch OPT.solver
         body_data = plot_vars.planetary_conditions(:,end);
         body_X = body_data(1)/AU;	% DU
         body_Y = body_data(2)/AU; 	% DU
-        scatter(body_X,body_Y,size_planet,plot_col(2,:),'filled');	% Body Position
+        plot(body_X,body_Y,'Color',plot_col(2,:),'marker','.','markersize',planet_size);    % Body Position
         Legend1{4} = BOD.bodies{end};
         
         % Plot the Target Body's SOI
@@ -354,11 +376,13 @@ switch OPT.solver
         % Final Graph Elements
         hold off
         xlabel('Time (TU)')
-        ylabel('\phi (\circ)')
+        ylabel('\phi (deg)')
         legend(string(Legend2),'location','eastoutside')
         title('Thruster Pointing Angle \phi for Indirect FSM')
         set(gca,'FontSize',font_size)
         set(gca,'FontName',font_style)
+        ylim([0 360])
+        yticks([0,45,90,135,180,225,270,315,360])
     
     case {'MGALT_DIR_FBSM_2D'}
         
@@ -366,7 +390,7 @@ switch OPT.solver
         figure(1)
         
         % Grid Basics
-        scatter(0,0,size_sun,[.95 .95 0],'filled');  % Plot the Sun
+        plot(0,0,'color',sun_color,'marker','.','markersize',sun_size);  % Plot the Sun
         hold on
         grid on
         count = 1;
@@ -381,7 +405,7 @@ switch OPT.solver
             body_data = plot_vars.planetary_conditions(:,i1);
             body_X = body_data(1)/AU;	% DU
             body_Y = body_data(2)/AU; 	% DU
-            scatter(body_X,body_Y,size_planet,plot_col(i1,:),'filled');	% Body Position
+            plot(body_X,body_Y,'Color',plot_col(i1,:),'marker','.','markersize',planet_size);   % Body Position
             
             % Plot the Departure Body's SOI
             body_SOI = CONST.(strcat(BOD.bodies{i1},"_SOI"))/AU;
@@ -430,8 +454,8 @@ switch OPT.solver
             thrust_arc_bs = plot_vars.seg_start_bs{i1,1}(:,2);
             [thrust_X_fs,thrust_Y_fs] = pol2cart(thrust_arc_fs*pi/180,thrust_R_fs);	% points for the thrust vectors
             [thrust_X_bs,thrust_Y_bs] = pol2cart(thrust_arc_bs*pi/180,thrust_R_bs);
-            thrust_mag_fs = thrust_plot_dist/AU/5*ones(length(thrust_switch_fs),1);	% magnitude of thrust vectors for visual
-            thrust_mag_bs = thrust_plot_dist/AU/5*ones(length(thrust_switch_bs),1);
+            thrust_mag_fs = arrow_length*ones(length(thrust_switch_fs),1);
+            thrust_mag_bs = arrow_length*ones(length(thrust_switch_bs),1);
             thrust_ang_global_fs = thrust_arc_fs + 90 - thrust_angle_fs';        	% global angle for thrust vectors
             thrust_ang_global_bs = thrust_arc_bs + 90 - thrust_angle_bs';
             [thrust_X_global_fs,thrust_Y_global_fs] = pol2cart(thrust_ang_global_fs*pi/180,thrust_mag_fs);	% points for the thrust vectors 
@@ -443,19 +467,20 @@ switch OPT.solver
             for i2 = 1:length(thrust_X_fs)
                 
                 if thrust_switch_fs(i2)
-                    thrust_point_line_fs(i1,i2) = scatter(thrust_X_fs(i2),...
-                        thrust_Y_fs(i2),25,[0,0.5,0],'filled');
+                    thrust_point_line_fs(i1,i2) = plot(thrust_X_fs(i2),thrust_Y_fs(i2),...
+                        'Color',arrow_color,'marker','.','markersize',point_size);
                     thrust_quiver_line_fs(i1,quiver_count_fs) = ...
                         quiver(thrust_X_fs(i2),thrust_Y_fs(i2),...
                         thrust_X_global_fs(i2),thrust_Y_global_fs(i2),...
-                        'color',[0,0.5,0],'MaxHeadSize',thrust_plot_dist);
+                        'color',[0,0.5,0],'MaxHeadSize',(arrow_head_size*AU),...
+                        'LineWidth',arrow_width);
                     set(get(get(thrust_quiver_line_fs(i1,quiver_count_fs),...
                         'Annotation'),'LegendInformation'),...
                         'IconDisplayStyle','off');                              % Exclude line from legend
                     quiver_count_fs = quiver_count_fs+1;
                 else
-                    thrust_point_line_fs(i1,i2) = ...
-                        scatter(thrust_X_fs(i2),thrust_Y_fs(i2),25,[0,0.5,0]);
+                    thrust_point_line_fs(i1,i2) = plot(thrust_X_fs(i2),thrust_Y_fs(i2),...
+                        'Color',arrow_color,'marker','o','markersize',point_size/4);
                 end
                 
                 set(get(get(thrust_point_line_fs(i1,i2),'Annotation'),...
@@ -467,19 +492,20 @@ switch OPT.solver
             for i3 = 1:length(thrust_X_bs)
                 
                 if thrust_switch_bs(i3)
-                    thrust_point_line_bs(i1,i3) = scatter(thrust_X_bs(i3),...
-                        thrust_Y_bs(i3),25,[0,0.5,0],'filled');
+                    thrust_point_line_bs(i1,i3) = plot(thrust_X_bs(i3),thrust_Y_bs(i3),...
+                        'Color',arrow_color,'marker','.','markersize',point_size);
                     thrust_quiver_line_bs(i1,quiver_count_bs) = ...
                         quiver(thrust_X_bs(i3),thrust_Y_bs(i3),...
                         thrust_X_global_bs(i3),thrust_Y_global_bs(i3),...
-                        'color',[0,0.5,0],'MaxHeadSize',thrust_plot_dist);
+                        'color',[0,0.5,0],'MaxHeadSize',(arrow_head_size*AU),...
+                        'LineWidth',arrow_width);
                     set(get(get(thrust_quiver_line_bs(i1,quiver_count_bs),...
                         'Annotation'),'LegendInformation'),...
                         'IconDisplayStyle','off');                              % Exclude line from legend
                     quiver_count_bs = quiver_count_bs+1;
                 else
-                    thrust_point_line_bs(i1,i3) = ...
-                        scatter(thrust_X_bs(i3),thrust_Y_bs(i3),25,[0,0.5,0]);
+                    thrust_point_line_bs(i1,i3) = plot(thrust_X_bs(i3),thrust_Y_bs(i3),...
+                        'Color',arrow_color,'marker','o','markersize',point_size/4);
                 end
                 
                 set(get(get(thrust_point_line_bs(i1,i3),'Annotation'),...
@@ -499,7 +525,7 @@ switch OPT.solver
         body_data = plot_vars.planetary_conditions(:,end);
         body_X = body_data(1)/AU;	% DU
         body_Y = body_data(2)/AU; 	% DU
-        scatter(body_X,body_Y,size_planet,plot_col(i1+1,:),'filled');	% Body Position
+        plot(body_X,body_Y,'Color',plot_col(i1+1,:),'marker','.','markersize',planet_size);    % Body Position
         Legend1{count+1} = BOD.bodies{end};
         
         % Plot the Target Body's SOI
@@ -518,7 +544,7 @@ switch OPT.solver
         
         % Have 1 match point displayed
         sc_bs_terminal_point(i1,1) = plot(sc_X_bs(end),sc_Y_bs(end),line_shape_terminal_point,'linewidth',line_width_terminal_point);
-        Legend1{count+2} = text_terminal;
+        Legend1{count+2} = font_terminal;
         
         % Final Graph Elements
         axis square
@@ -674,15 +700,17 @@ switch OPT.solver
 
         % Final Graph Elements
         sc_bs_terminal_point(i1,1) = plot(time_bs(1,1),plot_vars.thrust_phi_bs{end,1}(1),line_shape_terminal_point,'linewidth',line_width_terminal_point);
-        Legend2{count+1} = text_terminal;
+        Legend2{count+1} = font_terminal;
 
         hold off
         xlabel('Time (TU)')
-        ylabel('\phi (\circ)')
+        ylabel('\phi (deg)')
         legend(string(Legend2),'location','eastoutside')
         title('Thruster Pointing Angle \phi for Direct FBSM')
         set(gca,'FontSize',font_size)
         set(gca,'FontName',font_style)
+        ylim([0 360])
+        yticks([0,45,90,135,180,225,270,315,360])
     
     case {'MGALT_IN_FBSM_2D'}
     
@@ -690,7 +718,7 @@ switch OPT.solver
         figure(1)
         
         % Grid Basics
-        scatter(0,0,size_sun,[.95 .95 0],'filled');  % Plot the Sun
+        plot(0,0,'color',sun_color,'marker','.','markersize',sun_size);  % Plot the Sun
         hold on
         grid on
         count = 1;
@@ -705,7 +733,7 @@ switch OPT.solver
             body_data = plot_vars.planetary_conditions(:,i1);
             body_X = body_data(1)/AU;	% DU
             body_Y = body_data(2)/AU; 	% DU
-            scatter(body_X,body_Y,size_planet,plot_col(i1,:),'filled');	% Body Position
+            plot(body_X,body_Y,'Color',plot_col(i1,:),'marker','.','markersize',planet_size);   % Body Position
             
             % Plot the Departure Body's SOI
             body_SOI = CONST.(strcat(BOD.bodies{i1},"_SOI"))/AU;
@@ -753,7 +781,7 @@ switch OPT.solver
         body_data = plot_vars.planetary_conditions(:,end);
         body_X = body_data(1)/AU;	% DU
         body_Y = body_data(2)/AU; 	% DU
-        scatter(body_X,body_Y,size_planet,plot_col(i1+1,:),'filled');	% Body Position
+        plot(body_X,body_Y,'Color',plot_col(i1+1,:),'marker','.','markersize',planet_size);    % Body Position
         Legend1{count+1} = BOD.bodies{end};
         
         % Plot the Target Body's SOI
@@ -772,7 +800,7 @@ switch OPT.solver
         
         % Have 1 match point displayed
         sc_bs_terminal_point(i1,1) = plot(sc_X_bs(end),sc_Y_bs(end),line_shape_terminal_point,'linewidth',line_width_terminal_point);
-        Legend1{count+2} = text_terminal;
+        Legend1{count+2} = font_terminal;
         
         % Final Graph Elements
         axis square
@@ -797,7 +825,7 @@ switch OPT.solver
         count = 0;
         
         % Run through all the transfers
-        for i1 = 1:transfers
+        for i1 = 1:VAR.transfers
             
             count = count+1;
             
@@ -851,15 +879,17 @@ switch OPT.solver
         
         % Final Graph Elements
         sc_bs_terminal_point(i1,1) = plot(time_bs(1),phi_bs(1),line_shape_terminal_point,'linewidth',line_width_terminal_point);
-        Legend2{count+1} = text_terminal;
+        Legend2{count+1} = font_terminal;
         
         hold off
         xlabel('Time (TU)')
-        ylabel('\phi (\circ)')
+        ylabel('\phi (deg)')
         legend(string(Legend2),'location','eastoutside')
         title('Thruster Pointing Angle \phi for Indirect FBSM')
         set(gca,'FontSize',font_size)
         set(gca,'FontName',font_style)
+        ylim([0 360])
+        yticks([0,45,90,135,180,225,270,315,360])
         
     otherwise
         

@@ -3,9 +3,6 @@
 % House cleaning
 close all; clear; clc   % Clears up the workspace and command window
 
-% Warnings
-% warning('off','all')    % Suppresses warnings in command window
-
 % Add other folders
 addpath     Algorithms\                         ...
             Algorithms\Algorithm_Parameters\    ...
@@ -140,15 +137,17 @@ OPT.island = optionsIsland('3M-all');
 OPT.GA(1,1) = parametersGA('75_30');        % Genetic Algorithm Island #1
 OPT.DE(1,1) = parametersDE('75_30');        % Differential Evolution Island #1
 OPT.PSO(1,1) = parametersPSO('50_50');      % Particle Swarm Island #1
-OPT.MBH(1,1).N1_Outer = 5000;
+OPT.MBH(1,1).N1_Outer = 2000;
 OPT.MBH(1,1).N1_Inner = 500;
-OPT.MBH(1,1).N2_Outer = 150;
-OPT.MBH(1,1).N2_Inner = 50;
+OPT.MBH(1,1).N2_Outer = 250;
+OPT.MBH(1,1).N2_Inner = 100;
 OPT.MBH(1,1).maxclst = 5;
 OPT.MBH(1,1).per_feas = [3.00,1.75,1.25,1.00];
 OPT.MBH(1,1).per_rand = [0.1,0.07,0.04,0.01];
+OPT.MBH(1,1).feas_check = @any;
+OPT.MBH(1,1).feas_tol = 1e-5;
 
-            
+
 
 %% User Error Catch
 

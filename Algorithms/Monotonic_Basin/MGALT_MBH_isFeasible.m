@@ -1,5 +1,5 @@
 function [feasible,pert,transfer] = ...
-    MGALT_MBH_isFeasible(BOD,CONST,OPT,VAR,plot_vars,per_feas)
+    MGALT_MBH_isFeasible(BOD,CONST,OPT,OPT_algo,VAR,plot_vars,per_feas)
 % FORM: [feasible,pert,transfer] = ...
 %       MGALT_MBH_isFeasible(BOD,CONST,OPT,VAR,plot_vars,per_feas)
 %
@@ -196,7 +196,7 @@ switch OPT.solver
             % I need to see if the match points are feasible.
             % Dr. Englander recommended using 1e-5 AU for the tolerance
             % point
-            tol = OPT.weighting.MBH_feas;
+            tol = OPT_algo.feas_tol;
             check = zeros(1,3);
             
             % Get the position norms, vel rad, and vel tan
@@ -253,7 +253,7 @@ switch OPT.solver
             % I need to see if the match points are feasible.
             % Dr. Englander recommended using 1e-5 AU for the tolerance
             % point
-            tol = OPT.weighting.MBH_feas;
+            tol = OPT_algo.feas_tol;
             check = zeros(1,3);
             
             % Get the position norms, vel rad, and vel tan

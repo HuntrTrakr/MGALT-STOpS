@@ -95,8 +95,10 @@ switch selection
         'N2_Outer',200,...                  % Number of iter for the 2nd run
         'N2_Inner',50,...                   % Number of iter per loop for the 2nd
         'maxclst',30,...                    % Max number of clusters to find
-        'per_feas',[5.00,2.50,1.25,100],...	% SOI to declare result feasible
-        'per_rand',[0.10,0.05,0.02,0.01]); 	% Perturbation for MBH
+        'per_feas',[5.00,2.50,1.25,1.00],...	% SOI to declare result feasible
+        'per_rand',[0.10,0.05,0.02,0.01],...% Perturbation for MBH
+        'feas_check',@any,...               % Any or all for feasibility check
+        'feas_tol',1e-5);                   % Feasibility tolerance for FBSM
 
     case {'3M-1200_500'}    % 3 Mig: 1200 loops and 500 iter
 
@@ -106,8 +108,10 @@ switch selection
         'N2_Outer',600,...                  % Number of iter for the 2nd run
         'N2_Inner',250,...                  % Number of iter per loop for the 2nd
         'maxclst',30,...                    % Max number of clusters to find
-        'per_feas',[5.00,2.50,1.25,100],...	% SOI to declare result feasible
-        'per_rand',[0.10,0.05,0.02,0.01]); 	% Perturbation for MBH
+        'per_feas',[5.00,2.50,1.25,1.00],...	% SOI to declare result feasible
+        'per_rand',[0.10,0.05,0.02,0.01],...% Perturbation for MBH
+        'feas_check',@any,...               % Any or all for feasibility check
+        'feas_tol',1e-5);                   % Feasibility tolerance for FBSM
 
     case {'4M-500_200'}     % 4 Mig: 500 loops and 200 iter
 
@@ -118,7 +122,9 @@ switch selection
         'N2_Inner',50,...                           % Number of iter per loop for the 2nd
         'maxclst',10,...                            % Max number of clusters to find
         'per_feas',[5.00,2.50,1.75,1.25,1.00],...	% SOI to declare result feasible
-        'per_rand',[0.10,0.07,0.05,0.02,0.01]);     % Perturbation for MBH
+        'per_rand',[0.10,0.07,0.05,0.02,0.01],...   % Perturbation for MBH
+        'feas_check',@any,...                       % Any or all for feasibility check
+        'feas_tol',1e-5);                           % Feasibility tolerance for FBSM
     
     otherwise               % Error
 

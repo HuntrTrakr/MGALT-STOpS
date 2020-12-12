@@ -68,27 +68,31 @@ end
 
 if isfield(OPT,'MBH')
     
-    if (size(OPT.MBH.per_feas,2) < (OPT.island.Nmig+1))...
-            || (size(OPT.MBH.per_rand,2) < (OPT.island.Nmig+1))
+    for i1 = 1:size(OPT.MBH,2)
+    
+        if (size(OPT.MBH(i1).per_feas,2) < (OPT.island.Nmig+1))...
+                || (size(OPT.MBH(i1).per_rand,2) < (OPT.island.Nmig+1))
 
-        errorPathDisplay();
-        fprintf(2,'MBH will break on the last migration.\n')
-        fprintf(2,'The number of migrations is larger than the size of "per_feas" or "per_rand" in "options_MBH".\n')
-        fprintf(2,'Reduce the number of migrations or add another element to "per_feas" or "per_rand".\n')
+            errorPathDisplay();
+            fprintf(2,'MBH will break on the last migration.\n')
+            fprintf(2,'The number of migrations is larger than the size of "per_feas" or "per_rand" in "OPT.MBH(%1.0f)".\n',i1)
+            fprintf(2,'Reduce the number of migrations or add another element to "per_feas" or "per_rand".\n')
 
-        isBroken = true;
-        return
+            isBroken = true;
+            return
 
-    elseif (size(OPT.MBH.per_feas,2) > (OPT.island.Nmig+1))...
-            || (size(OPT.MBH.per_rand,2) > (OPT.island.Nmig+1))
+        elseif (size(OPT.MBH(i1).per_feas,2) > (OPT.island.Nmig+1))...
+                || (size(OPT.MBH(i1).per_rand,2) > (OPT.island.Nmig+1))
 
-        errorPathDisplay();
-        fprintf(2,'MBH has more elements in "per_feas" or "per_rand" than Island Iterations.\n')
-        fprintf(2,'MBH has %2.0f "per_feas" parameters and %2.0f "per_rand" parameters.\n',size(OPT.MBH.per_feas,2),size(OPT.MBH.per_rand,2))
-        fprintf(2,'The optimizer will still run but only the first %2.0f MBH parameter(s) will be used.\n\n',OPT.island.Nmig+1)
-        fprintf(2,'Pausing for 10 sec...\n')
-        pause(10)
+            errorPathDisplay();
+            fprintf(2,'MBH has more elements in "per_feas" or "per_rand" than Island Iterations.\n')
+            fprintf(2,'MBH has %2.0f "per_feas" parameters and %2.0f "per_rand" parameters.\n',size(OPT.MBH(i1).per_feas,2),size(OPT.MBH(i1).per_rand,2))
+            fprintf(2,'The optimizer will still run but only the first %2.0f MBH parameter(s) will be used.\n\n',OPT.island.Nmig+1)
+            fprintf(2,'Pausing for 10 sec...\n')
+            pause(10)
 
+        end
+    
     end
 
 end
@@ -118,6 +122,7 @@ catch
     warning('Reference to non-existent field')
     
 end
+
 
 % If doing MGALT Transfers
 switch OPT.solver

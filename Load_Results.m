@@ -16,9 +16,9 @@ addpath Error_Messages\                 ...
     
 %% Current Verification Results
 
-% load DEMO_results.mat;
+load DEMO_results.mat;
 
-load your_filename_here.mat;
+% load your_filename_here.mat;
 
 
 

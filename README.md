@@ -1,32 +1,40 @@
-# MGALT STOpS
-This MATLAB code was used by Malloy in his thesis titled "Spacecraft Trajectory Optimization Suite (STOpS): Design and Optimization of Multiple Gravity-Assist Low-Thrust (MGALT) Trajectories Using Modern Optimization Techniques". This code is the continuation of work done by Fitzgerald and Sheehan with the MGALT and Low-Thrust problems respectively.
+MGALT-STOpS 1.2
+===============
 
-<!-- # Motivation -->
-<!-- A short description of the motivation behind the creation and maintenance of the project. -->
-<!-- This should explain **why** the project exists. -->
-<!--  -->
-<!-- # Build Status -->
-<!-- [Add node reference in here] taken from https://medium.com/@meakaakka/a-beginners-guide-to-writing-a-kickass-readme-7ac01da88ab3 -->
-<!-- https://docs.github.com/en/github/writing-on-github/basic-writing-and-formatting-syntax -->
-
-# Framework
-Built with [MATLAB](https://www.mathworks.com/products/matlab.html)
-
-<!-- # Installation -->
-<!-- Provide step by step series of examples and explanations about how to get a development env running. -->
-<!--  -->
-<!-- # How to Use? -->
-<!-- If people like your project they’ll want to learn how they can use it. To do so include step by step guide to use your project. -->
-<!--  -->
-<!-- # Code Example -->
-<!-- Show what the library does as concisely as possible, developers should be able to figure out **how** your project solves their problem by looking at the code example. -->
-<!-- Make sure the API you are showing off is obvious, and that your code is short and concise. -->
-<!--  -->
-<!-- # API Reference -->
-<!-- Depending on the size of the project, if it is small and simple enough the reference docs can be added to the README. -->
-<!-- For medium size to larger projects it is important to at least provide a link to where the API reference docs live. -->
-<!--  -->
-<!-- # Credits -->
+MGALT-STOpS is a software suite which allows for optimization of low-thrust spacecraft trajectories between multiple planets.
+The Spacecraft Trajectory Optimization Suite (STOpS) uses Multiple Gravity-Assist Low-Thrust (MGALT) trajectories paired with the island model paradigm to accomplish this goal. 
+The island model utilizes four different global search algorithms: a Genetic Algorithm, Differential Evolution, Particle Swarm Optimization, and Monotonic Basin Hopping.
+Each island runs either a direct or indirect optimization method to solve for the most optimal trajectory between multiple planets.
 
 
+## Examples
 
+Included in this download is a demo program, titled "MGALT_STOpS_DEMO", which provides a step by step walkthrough of MGALT-STOpS and explains everything along the way.
+It is recommended to become familiar with the demo script before venturing into customization with the main script.
+
+
+## Framework
+
+All of the files were built and tested with MATLAB 2019b [MATLAB](https://www.mathworks.com/products/matlab.html).
+Future versions of MATLAB may not be supported, and there are no plans for continued development of MGALT-STOpS on future versions of MATLAB.
+
+No toolboxes are necessary to run MGALT-STOpS; however, the "Parallel Computing in Optimization Toolbox" can be used to greatly speed up execution time of MGALT-STOpS.
+There is an option to enable/disable parallel computing at the beginning of the scripts.
+
+
+## This Version
+
+Version 1.2 fixes a bug with the implementation of parallel computing in the MBH secondary search, updates default weighting parameters, and makes the arrows on the direct method plot more consistent.
+
+
+## More Information
+
+This code was inherited/developed/updated by Malloy to support his thesis, "Spacecraft Trajectory Optimization Suite (STOpS): Design and Optimization of Multiple Gravity-Assist Low-Thrust (MGALT) Trajectories Using Modern Optimization Techniques"; a requirement for a MS in Aerospace Engineering at California Polytechnic State University, San Luis Obispo.
+
+The development of MGALT-STOpS was a continuation of prior work on STOpS by Shane P. Sheehan and Timothy J. Fitzgerald.
+The supporting thesis for MGALT-STOpS, Low-Thrust STOpS, and STOpS can be found below:
+* "Spacecraft Trajectory Optimization Suite (STOpS): Design and Optimization of Multiple Gravity-Assist Low-Thrust (MGALT) Trajectories Using Modern Optimization Techniques" (link TBD) by MALLOY (2020)
+* ["Spacecraft Trajectory Optimization Suite (STOPS): Optimization of Low-Thrust Interplanetary Spacecraft Trajectories Using Modern Optimization Techniques"](https://digitalcommons.calpoly.edu/theses/1901/) by SHEEHAN (2017)
+* ["Spacecraft Trajectory Optimization Suite (STOpS): Optimization of Multiple Gravity Assist Spacecraft Trajectories Using Modern Optimization Techniques"](https://digitalcommons.calpoly.edu/theses/1503/) by FITZGERALD (2015)
+
+The author can be contacted on Discord at "HuntrTrakr#8835" if there are any questions.
