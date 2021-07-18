@@ -33,7 +33,7 @@ This code was inherited/developed/updated by Malloy to support his thesis, "Spac
 
 The development of MGALT-STOpS was a continuation of prior work on STOpS by Shane P. Sheehan and Timothy J. Fitzgerald.
 The supporting thesis for MGALT-STOpS, Low-Thrust STOpS, and STOpS can be found below:
-* "Spacecraft Trajectory Optimization Suite (STOpS): Design and Optimization of Multiple Gravity-Assist Low-Thrust (MGALT) Trajectories Using Modern Optimization Techniques" (link TBD) by MALLOY (2020)
+* ["Spacecraft Trajectory Optimization Suite (STOpS): Design and Optimization of Multiple Gravity-Assist Low-Thrust (MGALT) Trajectories Using Modern Optimization Techniques"](https://digitalcommons.calpoly.edu/theses/2247/) by MALLOY (2020)
 * ["Spacecraft Trajectory Optimization Suite (STOPS): Optimization of Low-Thrust Interplanetary Spacecraft Trajectories Using Modern Optimization Techniques"](https://digitalcommons.calpoly.edu/theses/1901/) by SHEEHAN (2017)
 * ["Spacecraft Trajectory Optimization Suite (STOpS): Optimization of Multiple Gravity Assist Spacecraft Trajectories Using Modern Optimization Techniques"](https://digitalcommons.calpoly.edu/theses/1503/) by FITZGERALD (2015)
 
